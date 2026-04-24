@@ -14,7 +14,11 @@ export default defineManifest({
       "128": "icons/icon-128.png",
     },
   },
-  permissions: ["storage"],
+  background: {
+    service_worker: "src/background/service-worker.ts",
+    type: "module",
+  },
+  permissions: ["storage", "notifications", "offscreen"],
   omnibox: { keyword: "cli" },
   commands: {
     _execute_action: {

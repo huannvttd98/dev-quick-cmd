@@ -15,4 +15,11 @@ export default defineConfig({
       port: 5173,
     },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        offscreen: "src/offscreen/clipboard.html",
+      },
+    },
+  },
 });

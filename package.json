@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
-    "test": "vitest"
+    "test": "vitest",
+    "pack": "npm run build && node scripts/pack.mjs"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/huannvttd98/dev-quick-cmd#readme",
   "dependencies": {
+    "fuse.js": "^7.3.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   },
@@ -37,6 +39,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^6.0.3",
     "vite": "^8.0.10",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "zip-a-folder": "^6.1.1"
   }
 }
