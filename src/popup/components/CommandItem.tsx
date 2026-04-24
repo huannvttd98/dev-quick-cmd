@@ -6,7 +6,6 @@ interface Props {
   command: Command;
   active: boolean;
   isFavorite: boolean;
-  onSelect: () => void;
   onOpenDetail: () => void;
   onToggleFavorite: () => void;
 }
@@ -15,7 +14,6 @@ export function CommandItem({
   command,
   active,
   isFavorite,
-  onSelect,
   onOpenDetail,
   onToggleFavorite,
 }: Props) {
@@ -33,7 +31,7 @@ export function CommandItem({
       ref={ref}
       role="button"
       tabIndex={-1}
-      onClick={onSelect}
+      onClick={onOpenDetail}
       className={`flex w-full cursor-pointer items-start gap-2 border-b border-slate-100 px-3 py-2 text-left transition-colors dark:border-slate-800 ${
         active
           ? "bg-blue-50 dark:bg-blue-950/50"
@@ -56,34 +54,21 @@ export function CommandItem({
           </div>
         )}
       </div>
-      <div className="flex shrink-0 flex-col items-center gap-0.5">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onOpenDetail();
-          }}
-          className="rounded p-1 text-sm leading-none text-slate-300 transition-colors hover:text-blue-500 dark:text-slate-600"
-          title="Show details"
-          aria-label="Show details"
-        >
-          ℹ️
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite();
-          }}
-          className={`rounded p-1 text-lg leading-none transition-colors ${
-            isFavorite
-              ? "text-yellow-500 hover:text-yellow-600"
-              : "text-slate-300 hover:text-yellow-500 dark:text-slate-600"
-          }`}
-          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        >
-          {isFavorite ? "★" : "☆"}
-        </button>
-      </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite();
+        }}
+        className={`shrink-0 rounded p-1 text-lg leading-none transition-colors ${
+          isFavorite
+            ? "text-yellow-500 hover:text-yellow-600"
+            : "text-slate-300 hover:text-yellow-500 dark:text-slate-600"
+        }`}
+        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+      >
+        {isFavorite ? "★" : "☆"}
+      </button>
     </div>
   );
 }

@@ -62,12 +62,15 @@ export function DetailDialog({ command, onCopy, onCopyText, onClose }: Props) {
         <div className="flex-1 overflow-y-auto p-3 text-sm">
           <Section label={command.steps?.length ? "Main command" : "Command"}>
             <code
-              className="block cursor-pointer whitespace-pre-wrap break-all rounded bg-slate-100 px-2 py-1.5 font-mono text-xs text-slate-900 transition-colors hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-700"
-              onClick={() => onCopyText(command.command, command.title)}
-              title="Click to copy"
+              className="block cursor-pointer whitespace-pre-wrap break-all rounded bg-blue-50 px-2 py-1.5 font-mono text-xs text-slate-900 ring-1 ring-blue-200 transition-colors hover:bg-blue-100 hover:ring-blue-400 dark:bg-blue-950/30 dark:text-slate-100 dark:ring-blue-800 dark:hover:bg-blue-950/50"
+              onClick={() => onCopy(command)}
+              title="Click to copy (prompts for placeholders)"
             >
               {command.command}
             </code>
+            <div className="mt-1 text-[10px] text-slate-400">
+              Click to copy {command.placeholders?.length ? "(will prompt for values)" : ""}
+            </div>
           </Section>
 
           {command.description && (

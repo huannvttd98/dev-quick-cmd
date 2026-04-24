@@ -152,11 +152,7 @@ export default function App({ mode = "popup" }: AppProps) {
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         setActiveIndex((i) => Math.max(i - 1, 0));
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        const cmd = filtered[activeIndex];
-        if (cmd) void handleSelect(cmd, e.ctrlKey || e.metaKey);
-      } else if (e.key === "?" || (e.key === "i" && e.ctrlKey)) {
+      } else if (e.key === "Enter" || e.key === "?") {
         e.preventDefault();
         const cmd = filtered[activeIndex];
         if (cmd) setDetailCommand(cmd);
@@ -210,9 +206,7 @@ export default function App({ mode = "popup" }: AppProps) {
       <>
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↑↓</kbd>{" "}
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↵</kbd>{" "}
-        copy ·{" "}
-        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">?</kbd>{" "}
-        info ·{" "}
+        details ·{" "}
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">Esc</kbd>{" "}
         back · {filtered.length} / {commands.length}
       </>
@@ -255,7 +249,6 @@ export default function App({ mode = "popup" }: AppProps) {
           commands={filtered}
           activeIndex={activeIndex}
           isFavorite={isFavorite}
-          onSelect={(cmd) => void handleSelect(cmd)}
           onOpenDetail={(cmd) => setDetailCommand(cmd)}
           onToggleFavorite={toggleFavorite}
         />
