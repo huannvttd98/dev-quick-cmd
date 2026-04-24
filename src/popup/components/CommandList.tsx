@@ -6,6 +6,7 @@ interface Props {
   activeIndex: number;
   isFavorite: (id: string) => boolean;
   onSelect: (cmd: Command) => void;
+  onOpenDetail: (cmd: Command) => void;
   onToggleFavorite: (id: string) => void;
 }
 
@@ -14,6 +15,7 @@ export function CommandList({
   activeIndex,
   isFavorite,
   onSelect,
+  onOpenDetail,
   onToggleFavorite,
 }: Props) {
   return (
@@ -25,6 +27,7 @@ export function CommandList({
           active={i === activeIndex}
           isFavorite={isFavorite(cmd.id)}
           onSelect={() => onSelect(cmd)}
+          onOpenDetail={() => onOpenDetail(cmd)}
           onToggleFavorite={() => onToggleFavorite(cmd.id)}
         />
       ))}

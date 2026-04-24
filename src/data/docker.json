@@ -30,10 +30,17 @@
       "id": "docker.run-detached",
       "title": "Run detached với tên",
       "command": "docker run -d --name {{name}} {{image}}",
+      "description": "Chạy container ở background với tên cụ thể",
       "tags": ["run", "background"],
       "placeholders": [
         { "key": "name", "hint": "Tên container" },
         { "key": "image", "hint": "Image" }
+      ],
+      "docs": "Flags:\n• -d (detached): chạy background, không block terminal\n• --name: đặt tên cố định để dễ reference (stop, logs, exec)\n\nCó thể thêm -p port mapping, -v volume, -e env vars.",
+      "examples": [
+        "docker run -d --name mynginx nginx:alpine",
+        "docker run -d --name mysql -e MYSQL_ROOT_PASSWORD=secret -p 3306:3306 mysql:8",
+        "docker run -d --name redis -p 6379:6379 redis:7-alpine"
       ]
     },
     {

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CategoryGrid } from "./components/CategoryGrid";
+import { CategoryHeader } from "./components/CategoryHeader";
 import { CategoryTabs, type TabId } from "./components/CategoryTabs";
 import { CommandList } from "./components/CommandList";
+import { DetailDialog } from "./components/DetailDialog";
 import { EmptyState } from "./components/EmptyState";
 import { PlaceholderDialog } from "./components/PlaceholderDialog";
 import { SearchBar } from "./components/SearchBar";
@@ -29,6 +31,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>("all");
   const [activeIndex, setActiveIndex] = useState(0);
   const [pendingCommand, setPendingCommand] = useState<Command | null>(null);
+  const [detailCommand, setDetailCommand] = useState<Command | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const searchInput = useRef<HTMLInputElement>(null);
@@ -67,6 +70,8 @@ export default function App() {
   }, [searcher, query, activeTab, baseList, commands]);
 
   const showGrid = activeTab === "all" && !query.trim();
+  const isCategoryTab =
+    activeTab !== "all" && activeTab !== "favorites" && activeTab !== "recent";
 
   useEffect(() => {
     setActiveIndex(0);
@@ -107,7 +112,7 @@ export default function App() {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (pendingCommand) return;
+      if (pendingCommand || detailCommand) return;
       if (showGrid) {
         if (e.key === "Escape" && query) {
           e.preventDefault();
@@ -125,6 +130,10 @@ export default function App() {
         e.preventDefault();
         const cmd = filtered[activeIndex];
         if (cmd) void handleSelect(cmd, e.ctrlKey || e.metaKey);
+      } else if (e.key === "?" || (e.key === "i" && e.ctrlKey)) {
+        e.preventDefault();
+        const cmd = filtered[activeIndex];
+        if (cmd) setDetailCommand(cmd);
       } else if (e.key === "Escape") {
         if (query) {
           e.preventDefault();
@@ -138,7 +147,7 @@ export default function App() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, activeIndex, pendingCommand, query, activeTab, showGrid]);
+  }, [filtered, activeIndex, pendingCommand, detailCommand, query, activeTab, showGrid]);
 
   const emptyProps = () => {
     if (activeTab === "favorites" && !favorites.length) {
@@ -174,9 +183,10 @@ export default function App() {
     return (
       <>
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↑↓</kbd>{" "}
-        navigate ·{" "}
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↵</kbd>{" "}
         copy ·{" "}
+        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">?</kbd>{" "}
+        info ·{" "}
         <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">Esc</kbd>{" "}
         back · {filtered.length} / {commands.length}
       </>
@@ -187,6 +197,13 @@ export default function App() {
     <div className="flex h-[500px] w-[400px] flex-col bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <SearchBar ref={searchInput} value={query} onChange={setQuery} />
       <CategoryTabs active={activeTab} onChange={setActiveTab} />
+      {isCategoryTab && (
+        <CategoryHeader
+          category={activeTab as Exclude<TabId, "all" | "favorites" | "recent">}
+          count={baseList.length}
+          onBack={() => setActiveTab("all")}
+        />
+      )}
       {showGrid ? (
         <CategoryGrid counts={countsByCategory} onSelect={handlePickCategory} />
       ) : filtered.length === 0 ? (
@@ -197,12 +214,21 @@ export default function App() {
           activeIndex={activeIndex}
           isFavorite={isFavorite}
           onSelect={(cmd) => void handleSelect(cmd)}
+          onOpenDetail={(cmd) => setDetailCommand(cmd)}
           onToggleFavorite={toggleFavorite}
         />
       )}
       <div className="border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
         {hintFooter()}
       </div>
+      <DetailDialog
+        command={detailCommand}
+        onCopy={(cmd) => {
+          setDetailCommand(null);
+          void handleSelect(cmd);
+        }}
+        onClose={() => setDetailCommand(null)}
+      />
       <PlaceholderDialog
         command={pendingCommand}
         onSubmit={handleSubmitPlaceholders}

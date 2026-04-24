@@ -22,6 +22,8 @@ export interface Command {
   description?: string;
   tags?: string[];
   placeholders?: Placeholder[];
+  examples?: string[];
+  docs?: string;
 }
 
 export interface Category {

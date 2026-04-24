@@ -6,14 +6,28 @@
       "title": "Status",
       "command": "git status",
       "description": "Xem trạng thái working tree",
-      "tags": ["check", "diff", "state"]
+      "tags": ["check", "diff", "state"],
+      "docs": "Hiển thị các file được staged, modified, untracked và branch hiện tại.\n\nThường dùng trước khi commit để xem mình sắp commit những gì. Không thay đổi repo.",
+      "examples": [
+        "git status",
+        "git status --short",
+        "git status -sb"
+      ]
     },
     {
       "id": "git.clone",
       "title": "Clone repository",
       "command": "git clone {{url}}",
+      "description": "Tải 1 repo remote về máy local",
       "tags": ["init", "download"],
-      "placeholders": [{ "key": "url", "hint": "Repository URL (https hoặc ssh)" }]
+      "placeholders": [{ "key": "url", "hint": "Repository URL (https hoặc ssh)" }],
+      "docs": "Clone tạo bản copy đầy đủ của repo remote, gồm toàn bộ history và branches.\n\nHỗ trợ HTTPS và SSH. Dùng SSH nếu muốn push mà không cần nhập password mỗi lần (cần ssh key đã add vào GitHub/GitLab).",
+      "examples": [
+        "git clone https://github.com/torvalds/linux.git",
+        "git clone git@github.com:user/repo.git",
+        "git clone https://github.com/user/repo.git my-local-name",
+        "git clone --depth 1 https://github.com/big/repo.git (shallow clone)"
+      ]
     },
     {
       "id": "git.add-all",
@@ -79,8 +93,15 @@
       "id": "git.new-branch",
       "title": "Create & switch to new branch",
       "command": "git checkout -b {{name}}",
+      "description": "Tạo branch mới từ branch hiện tại và switch sang luôn",
       "tags": ["branch", "create"],
-      "placeholders": [{ "key": "name", "hint": "Tên branch mới" }]
+      "placeholders": [{ "key": "name", "hint": "Tên branch mới" }],
+      "docs": "Tương đương với 2 lệnh: git branch <name> + git checkout <name>.\n\nBranch mới sẽ có cùng commit HEAD với branch hiện tại. Quy ước naming: feature/xxx, fix/xxx, hotfix/xxx.",
+      "examples": [
+        "git checkout -b feature/user-login",
+        "git checkout -b fix/header-bug",
+        "git checkout -b release/1.2.0 main  (tạo từ branch main cụ thể)"
+      ]
     },
     {
       "id": "git.delete-branch",

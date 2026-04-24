@@ -80,6 +80,13 @@
       "placeholders": [
         { "key": "pattern", "hint": "Pattern" },
         { "key": "path", "hint": "Đường dẫn", "default": "." }
+      ],
+      "docs": "Flags hữu ích:\n• -r: recursive (vào thư mục con)\n• -n: show line number\n• -i: case-insensitive\n• -w: match whole word\n• -l: chỉ show tên file (không show line)\n• --include='*.ts': chỉ tìm trong file khớp pattern\n• -E: extended regex (dùng ngoặc tròn và |)\n\nĐa số trường hợp nên dùng ripgrep (rg) thay vì grep — nhanh hơn nhiều.",
+      "examples": [
+        "grep -rn \"TODO\" src/",
+        "grep -rni \"todo\" . --include='*.ts'",
+        "grep -rlE \"(FIXME|HACK)\" src/",
+        "grep -v \"debug\" log.txt  (invert: không chứa)"
       ]
     },
     {

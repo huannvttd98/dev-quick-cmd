@@ -7,6 +7,7 @@ interface Props {
   active: boolean;
   isFavorite: boolean;
   onSelect: () => void;
+  onOpenDetail: () => void;
   onToggleFavorite: () => void;
 }
 
@@ -15,6 +16,7 @@ export function CommandItem({
   active,
   isFavorite,
   onSelect,
+  onOpenDetail,
   onToggleFavorite,
 }: Props) {
   const cat = CATEGORY_BY_ID[command.category];
@@ -54,21 +56,34 @@ export function CommandItem({
           </div>
         )}
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleFavorite();
-        }}
-        className={`shrink-0 rounded p-1 text-lg leading-none transition-colors ${
-          isFavorite
-            ? "text-yellow-500 hover:text-yellow-600"
-            : "text-slate-300 hover:text-yellow-500 dark:text-slate-600"
-        }`}
-        title={isFavorite ? "Remove from favorites" : "Add to favorites"}
-        aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-      >
-        {isFavorite ? "★" : "☆"}
-      </button>
+      <div className="flex shrink-0 flex-col items-center gap-0.5">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenDetail();
+          }}
+          className="rounded p-1 text-sm leading-none text-slate-300 transition-colors hover:text-blue-500 dark:text-slate-600"
+          title="Show details"
+          aria-label="Show details"
+        >
+          ℹ️
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite();
+          }}
+          className={`rounded p-1 text-lg leading-none transition-colors ${
+            isFavorite
+              ? "text-yellow-500 hover:text-yellow-600"
+              : "text-slate-300 hover:text-yellow-500 dark:text-slate-600"
+          }`}
+          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          {isFavorite ? "★" : "☆"}
+        </button>
+      </div>
     </div>
   );
 }
