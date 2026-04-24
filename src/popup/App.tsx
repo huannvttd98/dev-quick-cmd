@@ -8,6 +8,7 @@ import { EmptyState } from "./components/EmptyState";
 import { PlaceholderDialog } from "./components/PlaceholderDialog";
 import { SearchBar } from "./components/SearchBar";
 import { Toast } from "./components/Toast";
+import { UploadButton } from "./components/UploadButton";
 import { useCommands } from "./hooks/useCommands";
 import { useFavorites } from "./hooks/useFavorites";
 import { useHistory } from "./hooks/useHistory";
@@ -277,16 +278,22 @@ export default function App({ mode = "popup" }: Readonly<AppProps>) {
         value={query}
         onChange={setQuery}
         action={
-          mode === "popup" ? (
-            <button
-              onClick={() => void openSidepanel()}
-              className="rounded p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-blue-500 dark:hover:bg-slate-700"
-              title="Pin as sidebar"
-              aria-label="Pin as sidebar"
-            >
-              📌
-            </button>
-          ) : null
+          <div className="flex items-center gap-0.5">
+            <UploadButton
+              onStatus={setToastMessage}
+              onUploaded={() => void reload()}
+            />
+            {mode === "popup" && (
+              <button
+                onClick={() => void openSidepanel()}
+                className="rounded p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-blue-500 dark:hover:bg-slate-700"
+                title="Pin as sidebar"
+                aria-label="Pin as sidebar"
+              >
+                📌
+              </button>
+            )}
+          </div>
         }
       />
       <CategoryTabs active={activeTab} onChange={setActiveTab} />
