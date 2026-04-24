@@ -17,6 +17,7 @@
 | `typescript` | Compiler |
 | `tailwindcss` + `postcss` + `autoprefixer` | Styling pipeline |
 | `@types/chrome` | Type definitions cho `chrome.*` API |
+| `vitest` | Unit test (data integrity, pure logic như fuzzy search) |
 | `eslint` + `prettier` | Lint & format |
 
 ## Không dùng (có chủ đích)
@@ -44,6 +45,7 @@
 | `chrome.storage.sync` / `chrome.storage.local` | Lưu favorites, history, settings |
 | `chrome.commands` | Phím tắt global (vd `Ctrl+Shift+K` mở popup) |
 | `chrome.omnibox` | Gõ `cli` + `Tab` trong address bar để search |
+| `chrome.notifications` | Hiển thị toast "Copied!" khi copy từ omnibox (popup dùng UI toast riêng) |
 | `chrome.contextMenus` | (Tuỳ chọn) click chuột phải trên text để lookup |
 | `navigator.clipboard.writeText()` | Copy command vào clipboard |
 
