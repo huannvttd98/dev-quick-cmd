@@ -6,6 +6,7 @@ import linuxData from "./linux.json";
 import mysqlData from "./mysql.json";
 import nginxData from "./nginx.json";
 import nodeData from "./node.json";
+import recipesData from "./recipes.json";
 import sshData from "./ssh.json";
 
 const DATASETS: CategoryDataset[] = [
@@ -17,6 +18,7 @@ const DATASETS: CategoryDataset[] = [
   nginxData as CategoryDataset,
   nodeData as CategoryDataset,
   sshData as CategoryDataset,
+  recipesData as CategoryDataset,
 ];
 
 export function loadCommands(): Command[] {

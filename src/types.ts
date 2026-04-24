@@ -6,12 +6,19 @@ export type CategoryId =
   | "mysql"
   | "nginx"
   | "node"
-  | "ssh";
+  | "ssh"
+  | "recipes";
 
 export interface Placeholder {
   key: string;
   hint: string;
   default?: string;
+}
+
+export interface Step {
+  title: string;
+  command?: string;
+  description?: string;
 }
 
 export interface Command {
@@ -24,6 +31,7 @@ export interface Command {
   placeholders?: Placeholder[];
   examples?: string[];
   docs?: string;
+  steps?: Step[];
 }
 
 export interface Category {

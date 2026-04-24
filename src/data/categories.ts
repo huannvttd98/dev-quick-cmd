@@ -9,6 +9,7 @@ export const CATEGORIES: Category[] = [
   { id: "nginx", label: "Nginx", emoji: "🌐" },
   { id: "node", label: "Node.js", emoji: "📦" },
   { id: "ssh", label: "SSH/SCP", emoji: "🔑" },
+  { id: "recipes", label: "Recipes", emoji: "📖" },
 ];
 
 export const CATEGORY_BY_ID: Record<string, Category> = Object.fromEntries(

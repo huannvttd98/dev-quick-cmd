@@ -6,10 +6,11 @@ import type { Command } from "../../types";
 interface Props {
   command: Command | null;
   onCopy: (cmd: Command) => void;
+  onCopyText: (text: string, label: string) => void;
   onClose: () => void;
 }
 
-export function DetailDialog({ command, onCopy, onClose }: Props) {
+export function DetailDialog({ command, onCopy, onCopyText, onClose }: Props) {
   useEffect(() => {
     if (!command) return;
     const handler = (e: KeyboardEvent) => {
@@ -59,8 +60,12 @@ export function DetailDialog({ command, onCopy, onClose }: Props) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 text-sm">
-          <Section label="Command">
-            <code className="block whitespace-pre-wrap break-all rounded bg-slate-100 px-2 py-1.5 font-mono text-xs text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+          <Section label={command.steps?.length ? "Main command" : "Command"}>
+            <code
+              className="block cursor-pointer whitespace-pre-wrap break-all rounded bg-slate-100 px-2 py-1.5 font-mono text-xs text-slate-900 transition-colors hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-700"
+              onClick={() => onCopyText(command.command, command.title)}
+              title="Click to copy"
+            >
               {command.command}
             </code>
           </Section>
@@ -78,6 +83,39 @@ export function DetailDialog({ command, onCopy, onClose }: Props) {
               <p className="whitespace-pre-wrap text-slate-700 dark:text-slate-300">
                 {command.docs}
               </p>
+            </Section>
+          )}
+
+          {command.steps && command.steps.length > 0 && (
+            <Section label={`Steps (${command.steps.length})`}>
+              <ol className="space-y-3">
+                {command.steps.map((step, i) => (
+                  <li key={i} className="relative pl-8">
+                    <span className="absolute left-0 top-0 flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-semibold text-white">
+                      {i + 1}
+                    </span>
+                    <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                      {step.title}
+                    </div>
+                    {step.description && (
+                      <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                        {step.description}
+                      </div>
+                    )}
+                    {step.command && (
+                      <code
+                        className="mt-1 block cursor-pointer whitespace-pre-wrap break-all rounded bg-slate-100 px-2 py-1.5 font-mono text-xs text-slate-800 transition-colors hover:bg-blue-50 hover:ring-1 hover:ring-blue-300 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-blue-950 dark:hover:ring-blue-700"
+                        onClick={() =>
+                          onCopyText(step.command!, `Step ${i + 1}: ${step.title}`)
+                        }
+                        title="Click to copy this step"
+                      >
+                        {step.command}
+                      </code>
+                    )}
+                  </li>
+                ))}
+              </ol>
             </Section>
           )}
 
@@ -109,7 +147,11 @@ export function DetailDialog({ command, onCopy, onClose }: Props) {
               <ul className="space-y-1.5">
                 {command.examples.map((ex, i) => (
                   <li key={i}>
-                    <code className="block break-all rounded bg-slate-100 px-2 py-1 font-mono text-xs text-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                    <code
+                      className="block cursor-pointer break-all rounded bg-slate-100 px-2 py-1 font-mono text-xs text-slate-800 transition-colors hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-700"
+                      onClick={() => onCopyText(ex, "Example")}
+                      title="Click to copy"
+                    >
                       {ex}
                     </code>
                   </li>
@@ -145,7 +187,7 @@ export function DetailDialog({ command, onCopy, onClose }: Props) {
             onClick={() => onCopy(command)}
             className="flex-[2] rounded bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600"
           >
-            📋 Copy (Enter)
+            📋 Copy main (Enter)
           </button>
         </div>
       </div>

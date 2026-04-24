@@ -46,10 +46,28 @@ describe("data integrity", () => {
     }
   });
 
-  it("has commands for all 8 seeded categories", () => {
+  it("has commands for all seeded categories", () => {
     const cats = new Set(commands.map((c) => c.category));
     for (const cat of knownCategoryIds) {
       expect(cats.has(cat), `missing commands for category: ${cat}`).toBe(true);
+    }
+  });
+
+  it("step commands don't reference undeclared placeholders", () => {
+    for (const c of commands) {
+      if (!c.steps) continue;
+      const declared = new Set((c.placeholders ?? []).map((p) => p.key));
+      for (const step of c.steps) {
+        if (!step.command) continue;
+        const tokens = [...step.command.matchAll(/\{\{(\w+)\}\}/g)].map(
+          (m) => m[1],
+        );
+        const missing = tokens.filter((t) => !declared.has(t));
+        expect(
+          missing,
+          `${c.id} step "${step.title}" has undeclared tokens: ${missing.join(", ")}`,
+        ).toEqual([]);
+      }
     }
   });
 

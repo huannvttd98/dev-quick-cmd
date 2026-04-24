@@ -110,6 +110,15 @@ export default function App() {
     searchInput.current?.focus();
   };
 
+  const handleCopyText = async (text: string, label: string) => {
+    try {
+      await copyToClipboard(text);
+      setToastMessage(`Copied: ${label}`);
+    } catch {
+      setToastMessage("Copy failed");
+    }
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (pendingCommand || detailCommand) return;
@@ -227,6 +236,7 @@ export default function App() {
           setDetailCommand(null);
           void handleSelect(cmd);
         }}
+        onCopyText={handleCopyText}
         onClose={() => setDetailCommand(null)}
       />
       <PlaceholderDialog
