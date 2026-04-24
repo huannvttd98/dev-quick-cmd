@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { CategoryGrid } from "./components/CategoryGrid";
 import { CategoryTabs, type TabId } from "./components/CategoryTabs";
 import { CommandList } from "./components/CommandList";
 import { EmptyState } from "./components/EmptyState";
@@ -9,7 +10,7 @@ import { useCommands } from "./hooks/useCommands";
 import { useFavorites } from "./hooks/useFavorites";
 import { useHistory } from "./hooks/useHistory";
 import { useTheme } from "./hooks/useTheme";
-import type { Command } from "../types";
+import type { Command, CategoryId } from "../types";
 import {
   applyPlaceholders,
   copyToClipboard,
@@ -31,6 +32,14 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const searchInput = useRef<HTMLInputElement>(null);
+
+  const countsByCategory = useMemo<Record<string, number>>(() => {
+    const counts: Record<string, number> = {};
+    for (const c of commands) {
+      counts[c.category] = (counts[c.category] ?? 0) + 1;
+    }
+    return counts;
+  }, [commands]);
 
   const baseList = useMemo<Command[]>(() => {
     if (activeTab === "all") return commands;
@@ -56,6 +65,8 @@ export default function App() {
       scopedIds.has(c.id),
     );
   }, [searcher, query, activeTab, baseList, commands]);
+
+  const showGrid = activeTab === "all" && !query.trim();
 
   useEffect(() => {
     setActiveIndex(0);
@@ -89,9 +100,21 @@ export default function App() {
     searchInput.current?.focus();
   };
 
+  const handlePickCategory = (cat: CategoryId) => {
+    setActiveTab(cat);
+    searchInput.current?.focus();
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (pendingCommand) return;
+      if (showGrid) {
+        if (e.key === "Escape" && query) {
+          e.preventDefault();
+          setQuery("");
+        }
+        return;
+      }
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
@@ -106,13 +129,16 @@ export default function App() {
         if (query) {
           e.preventDefault();
           setQuery("");
+        } else if (activeTab !== "all") {
+          e.preventDefault();
+          setActiveTab("all");
         }
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtered, activeIndex, pendingCommand, query]);
+  }, [filtered, activeIndex, pendingCommand, query, activeTab, showGrid]);
 
   const emptyProps = () => {
     if (activeTab === "favorites" && !favorites.length) {
@@ -136,11 +162,34 @@ export default function App() {
     };
   };
 
+  const hintFooter = () => {
+    if (showGrid) {
+      return (
+        <>
+          Pick a category · type to search across all ·{" "}
+          {commands.length} commands total
+        </>
+      );
+    }
+    return (
+      <>
+        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↑↓</kbd>{" "}
+        navigate ·{" "}
+        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↵</kbd>{" "}
+        copy ·{" "}
+        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">Esc</kbd>{" "}
+        back · {filtered.length} / {commands.length}
+      </>
+    );
+  };
+
   return (
     <div className="flex h-[500px] w-[400px] flex-col bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <SearchBar ref={searchInput} value={query} onChange={setQuery} />
       <CategoryTabs active={activeTab} onChange={setActiveTab} />
-      {filtered.length === 0 ? (
+      {showGrid ? (
+        <CategoryGrid counts={countsByCategory} onSelect={handlePickCategory} />
+      ) : filtered.length === 0 ? (
         <EmptyState {...emptyProps()} />
       ) : (
         <CommandList
@@ -152,22 +201,14 @@ export default function App() {
         />
       )}
       <div className="border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
-        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↑↓</kbd>{" "}
-        navigate ·{" "}
-        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">↵</kbd>{" "}
-        copy ·{" "}
-        <kbd className="rounded bg-slate-200 px-1 dark:bg-slate-700">Esc</kbd>{" "}
-        clear · {commands.length} commands
+        {hintFooter()}
       </div>
       <PlaceholderDialog
         command={pendingCommand}
         onSubmit={handleSubmitPlaceholders}
         onCancel={() => setPendingCommand(null)}
       />
-      <Toast
-        message={toastMessage}
-        onClose={() => setToastMessage(null)}
-      />
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>
   );
 }
