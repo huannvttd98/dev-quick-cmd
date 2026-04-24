@@ -30,3 +30,4 @@ Chrome Extension giúp developer **tra cứu và copy command CLI** thường d�
 - [04-user-flow.md](04-user-flow.md) — Flow người dùng
 - [05-roadmap.md](05-roadmap.md) — Các milestone từng bước
 - [06-publishing.md](06-publishing.md) — Quy trình publish lên Chrome Web Store
+- [07-api-migration.md](07-api-migration.md) — (Future) Migrate static JSON → Database/API
