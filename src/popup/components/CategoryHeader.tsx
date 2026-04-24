@@ -1,15 +1,13 @@
-import { CATEGORY_BY_ID } from "../../data/categories";
-import type { CategoryId } from "../../types";
+import type { Category } from "../../types";
 
 interface Props {
-  category: CategoryId;
+  category: Category | undefined;
   count: number;
   onBack: () => void;
 }
 
-export function CategoryHeader({ category, count, onBack }: Props) {
-  const cat = CATEGORY_BY_ID[category];
-  if (!cat) return null;
+export function CategoryHeader({ category, count, onBack }: Readonly<Props>) {
+  if (!category) return null;
   return (
     <div className="flex items-center gap-2 border-b border-slate-200 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
       <button
@@ -20,9 +18,9 @@ export function CategoryHeader({ category, count, onBack }: Props) {
         ← Back
       </button>
       <span className="text-slate-300 dark:text-slate-600">|</span>
-      <span className="text-lg">{cat.emoji}</span>
+      <span className="text-lg">{category.emoji}</span>
       <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-        {cat.label}
+        {category.label}
       </span>
       <span className="text-xs text-slate-400">({count})</span>
     </div>

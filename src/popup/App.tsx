@@ -24,10 +24,18 @@ interface AppProps {
   mode?: "popup" | "sidepanel";
 }
 
-export default function App({ mode = "popup" }: AppProps) {
+export default function App({ mode = "popup" }: Readonly<AppProps>) {
   useTheme();
 
-  const { commands, searcher } = useCommands();
+  const {
+    commands,
+    categories,
+    categoryById,
+    searcher,
+    loading,
+    error,
+    reload,
+  } = useCommands();
   const { favorites, toggle: toggleFavorite, isFavorite } = useFavorites();
   const { history, push: pushHistory } = useHistory();
 
@@ -166,8 +174,8 @@ export default function App({ mode = "popup" }: AppProps) {
         }
       }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    globalThis.addEventListener("keydown", handler);
+    return () => globalThis.removeEventListener("keydown", handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filtered, activeIndex, pendingCommand, detailCommand, query, activeTab, showGrid]);
 
@@ -213,6 +221,55 @@ export default function App({ mode = "popup" }: AppProps) {
     );
   };
 
+  const renderBody = () => {
+    if (loading && commands.length === 0) {
+      return (
+        <EmptyState icon="⏳" title="Loading commands…" hint="Calling API" />
+      );
+    }
+    if (error && commands.length === 0) {
+      return (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
+          <div className="text-4xl">⚠️</div>
+          <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
+            Cannot load commands
+          </div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            {error}
+          </div>
+          <button
+            onClick={() => void reload()}
+            className="mt-2 rounded bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+    if (showGrid) {
+      return (
+        <CategoryGrid
+          categories={categories}
+          counts={countsByCategory}
+          onSelect={handlePickCategory}
+        />
+      );
+    }
+    if (filtered.length === 0) {
+      return <EmptyState {...emptyProps()} />;
+    }
+    return (
+      <CommandList
+        commands={filtered}
+        categoryById={categoryById}
+        activeIndex={activeIndex}
+        isFavorite={isFavorite}
+        onOpenDetail={(cmd) => setDetailCommand(cmd)}
+        onToggleFavorite={toggleFavorite}
+      />
+    );
+  };
+
   return (
     <div className="flex h-full w-full flex-col bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
       <SearchBar
@@ -235,29 +292,20 @@ export default function App({ mode = "popup" }: AppProps) {
       <CategoryTabs active={activeTab} onChange={setActiveTab} />
       {isCategoryTab && (
         <CategoryHeader
-          category={activeTab as Exclude<TabId, "all" | "favorites" | "recent">}
+          category={categoryById[activeTab]}
           count={baseList.length}
           onBack={() => setActiveTab("all")}
         />
       )}
-      {showGrid ? (
-        <CategoryGrid counts={countsByCategory} onSelect={handlePickCategory} />
-      ) : filtered.length === 0 ? (
-        <EmptyState {...emptyProps()} />
-      ) : (
-        <CommandList
-          commands={filtered}
-          activeIndex={activeIndex}
-          isFavorite={isFavorite}
-          onOpenDetail={(cmd) => setDetailCommand(cmd)}
-          onToggleFavorite={toggleFavorite}
-        />
-      )}
+      {renderBody()}
       <div className="border-t border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">
         {hintFooter()}
       </div>
       <DetailDialog
         command={detailCommand}
+        category={
+          detailCommand ? categoryById[detailCommand.category] : undefined
+        }
         onCopy={(cmd) => {
           setDetailCommand(null);
           void handleSelect(cmd);

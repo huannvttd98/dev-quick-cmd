@@ -1,13 +1,49 @@
-import { loadCommands } from "../data";
+import { fetchCategories, fetchCommands } from "../lib/api";
 import { createSearcher, searchWith } from "../lib/search";
-import type { Command } from "../types";
+import { storageGet, storageSet } from "../lib/storage";
+import type { Category, Command } from "../types";
 
-const commands = loadCommands();
-const searcher = createSearcher(commands);
+const CACHE_KEY = "api_cache_v1";
 
-const commandByContent = new Map<string, Command>(
-  commands.map((c) => [c.command, c]),
-);
+interface CacheShape {
+  commands: Command[];
+  categories: Category[];
+  fetchedAt: number;
+}
+
+let commandsPromise: Promise<Command[]> | null = null;
+
+async function loadCommands(): Promise<Command[]> {
+  const cached = await storageGet<CacheShape | null>("local", CACHE_KEY, null);
+  if (cached?.commands?.length) return cached.commands;
+
+  const [categories, commands] = await Promise.all([
+    fetchCategories(),
+    fetchCommands(),
+  ]);
+  await storageSet<CacheShape>("local", CACHE_KEY, {
+    commands,
+    categories,
+    fetchedAt: Date.now(),
+  });
+  return commands;
+}
+
+function getCommands(): Promise<Command[]> {
+  commandsPromise ??= loadCommands().catch((err) => {
+    commandsPromise = null;
+    throw err;
+  });
+  return commandsPromise;
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  void getCommands();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+  void getCommands();
+});
 
 const OFFSCREEN_URL = "src/offscreen/clipboard.html";
 
@@ -39,11 +75,11 @@ async function copyViaOffscreen(text: string): Promise<boolean> {
 
 function escapeXml(s: string): string {
   return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 chrome.omnibox.setDefaultSuggestion({
@@ -51,18 +87,31 @@ chrome.omnibox.setDefaultSuggestion({
 });
 
 chrome.omnibox.onInputChanged.addListener((text, suggest) => {
-  const results = searchWith(searcher, text, commands).slice(0, 8);
-  const suggestions: chrome.omnibox.SuggestResult[] = results.map((c) => ({
-    content: c.command,
-    description: `<match>${escapeXml(c.title)}</match> — <dim>${escapeXml(c.command)}</dim>`,
-  }));
-  suggest(suggestions);
+  void (async () => {
+    try {
+      const commands = await getCommands();
+      const searcher = createSearcher(commands);
+      const results = searchWith(searcher, text, commands).slice(0, 8);
+      const suggestions: chrome.omnibox.SuggestResult[] = results.map((c) => ({
+        content: c.command,
+        description: `<match>${escapeXml(c.title)}</match> — <dim>${escapeXml(c.command)}</dim>`,
+      }));
+      suggest(suggestions);
+    } catch {
+      suggest([]);
+    }
+  })();
 });
 
 chrome.omnibox.onInputEntered.addListener(async (text) => {
   const ok = await copyViaOffscreen(text);
-  const cmd = commandByContent.get(text);
-  const title = cmd?.title ?? "Command";
+  let title = "Command";
+  try {
+    const commands = await getCommands();
+    title = commands.find((c) => c.command === text)?.title ?? title;
+  } catch {
+    // leave default title
+  }
 
   try {
     await chrome.notifications.create({

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
-import { CATEGORY_BY_ID } from "../../data/categories";
-import type { Command } from "../../types";
+import type { Category, Command } from "../../types";
 
 interface Props {
   command: Command;
+  category?: Category;
   active: boolean;
   isFavorite: boolean;
   onOpenDetail: () => void;
@@ -12,12 +12,12 @@ interface Props {
 
 export function CommandItem({
   command,
+  category,
   active,
   isFavorite,
   onOpenDetail,
   onToggleFavorite,
-}: Props) {
-  const cat = CATEGORY_BY_ID[command.category];
+}: Readonly<Props>) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function CommandItem({
       }`}
     >
       <span className="mt-0.5 shrink-0 text-lg leading-5">
-        {cat?.emoji ?? "⚡"}
+        {category?.emoji ?? "⚡"}
       </span>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-slate-900 dark:text-slate-100">

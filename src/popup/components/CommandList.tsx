@@ -1,8 +1,9 @@
-import type { Command } from "../../types";
+import type { Category, Command } from "../../types";
 import { CommandItem } from "./CommandItem";
 
 interface Props {
   commands: Command[];
+  categoryById: Record<string, Category>;
   activeIndex: number;
   isFavorite: (id: string) => boolean;
   onOpenDetail: (cmd: Command) => void;
@@ -11,17 +12,19 @@ interface Props {
 
 export function CommandList({
   commands,
+  categoryById,
   activeIndex,
   isFavorite,
   onOpenDetail,
   onToggleFavorite,
-}: Props) {
+}: Readonly<Props>) {
   return (
     <div className="flex-1 overflow-y-auto">
       {commands.map((cmd, i) => (
         <CommandItem
           key={cmd.id}
           command={cmd}
+          category={categoryById[cmd.category]}
           active={i === activeIndex}
           isFavorite={isFavorite(cmd.id)}
           onOpenDetail={() => onOpenDetail(cmd)}

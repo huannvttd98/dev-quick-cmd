@@ -1,15 +1,15 @@
-import { CATEGORIES } from "../../data/categories";
-import type { CategoryId } from "../../types";
+import type { Category, CategoryId } from "../../types";
 
 interface Props {
+  categories: Category[];
   counts: Record<string, number>;
   onSelect: (category: CategoryId) => void;
 }
 
-export function CategoryGrid({ counts, onSelect }: Props) {
+export function CategoryGrid({ categories, counts, onSelect }: Readonly<Props>) {
   return (
     <div className="grid flex-1 grid-cols-2 gap-2 overflow-y-auto p-3 content-start">
-      {CATEGORIES.map((cat) => (
+      {categories.map((cat) => (
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}

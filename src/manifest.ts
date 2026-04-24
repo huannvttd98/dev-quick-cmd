@@ -19,6 +19,7 @@ export default defineManifest({
     type: "module",
   },
   permissions: ["storage", "notifications", "offscreen", "sidePanel"],
+  host_permissions: ["http://45.251.115.151:8787/*"],
   side_panel: {
     default_path: "src/sidepanel/index.html",
   },

@@ -1,16 +1,22 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { CATEGORY_BY_ID } from "../../data/categories";
-import type { Command } from "../../types";
+import type { Category, Command } from "../../types";
 
 interface Props {
   command: Command | null;
+  category?: Category;
   onCopy: (cmd: Command) => void;
   onCopyText: (text: string, label: string) => void;
   onClose: () => void;
 }
 
-export function DetailDialog({ command, onCopy, onCopyText, onClose }: Props) {
+export function DetailDialog({
+  command,
+  category,
+  onCopy,
+  onCopyText,
+  onClose,
+}: Readonly<Props>) {
   useEffect(() => {
     if (!command) return;
     const handler = (e: KeyboardEvent) => {
@@ -28,7 +34,7 @@ export function DetailDialog({ command, onCopy, onCopyText, onClose }: Props) {
 
   if (!command) return null;
 
-  const cat = CATEGORY_BY_ID[command.category];
+  const cat = category;
 
   return (
     <div

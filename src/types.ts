@@ -1,13 +1,4 @@
-export type CategoryId =
-  | "git"
-  | "docker"
-  | "laravel"
-  | "linux"
-  | "mysql"
-  | "nginx"
-  | "node"
-  | "ssh"
-  | "recipes";
+export type CategoryId = string;
 
 export interface Placeholder {
   key: string;
@@ -43,11 +34,4 @@ export interface Category {
 export interface HistoryEntry {
   id: string;
   usedAt: number;
-}
-
-export type RawCommand = Omit<Command, "category">;
-
-export interface CategoryDataset {
-  category: CategoryId;
-  commands: RawCommand[];
 }
