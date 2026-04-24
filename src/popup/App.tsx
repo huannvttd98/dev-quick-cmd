@@ -5,6 +5,7 @@ import { CategoryTabs, type TabId } from "./components/CategoryTabs";
 import { CommandList } from "./components/CommandList";
 import { DetailDialog } from "./components/DetailDialog";
 import { EmptyState } from "./components/EmptyState";
+import { JobsDialog } from "./components/JobsDialog";
 import { PlaceholderDialog } from "./components/PlaceholderDialog";
 import { SearchBar } from "./components/SearchBar";
 import { Toast } from "./components/Toast";
@@ -46,6 +47,7 @@ export default function App({ mode = "popup" }: Readonly<AppProps>) {
   const [pendingCommand, setPendingCommand] = useState<Command | null>(null);
   const [detailCommand, setDetailCommand] = useState<Command | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [jobsOpen, setJobsOpen] = useState(false);
 
   const searchInput = useRef<HTMLInputElement>(null);
 
@@ -281,8 +283,16 @@ export default function App({ mode = "popup" }: Readonly<AppProps>) {
           <div className="flex items-center gap-0.5">
             <UploadButton
               onStatus={setToastMessage}
-              onUploaded={() => void reload()}
+              onImported={() => void reload()}
             />
+            <button
+              onClick={() => setJobsOpen(true)}
+              className="rounded p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-blue-500 dark:hover:bg-slate-700"
+              title="Import queue"
+              aria-label="Import queue"
+            >
+              📋
+            </button>
             {mode === "popup" && (
               <button
                 onClick={() => void openSidepanel()}
@@ -325,6 +335,7 @@ export default function App({ mode = "popup" }: Readonly<AppProps>) {
         onSubmit={handleSubmitPlaceholders}
         onCancel={() => setPendingCommand(null)}
       />
+      <JobsDialog open={jobsOpen} onClose={() => setJobsOpen(false)} />
       <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>
   );

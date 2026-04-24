@@ -47,13 +47,32 @@ export async function fetchCategories(): Promise<Category[]> {
 
 const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
 
-export interface UploadJsonResult {
-  ok?: boolean;
-  file?: string;
-  [key: string]: unknown;
+export type ImportJobStatus = "pending" | "processing" | "done" | "failed";
+
+export interface ImportQueueJob {
+  jobId: string;
+  status: ImportJobStatus;
+  queueFile: string;
+  category?: string;
+  commandCount?: number;
+  importedCommands?: number;
+  attempts?: number;
+  createdAt: string;
+  startedAt?: string;
+  finishedAt?: string;
+  error?: string;
 }
 
-export async function uploadJson(file: File): Promise<UploadJsonResult> {
+export interface UploadJsonResponse {
+  message: string;
+  fileName: string;
+  savedTo: string;
+  category: string;
+  database: { driver: string; status: string; importedCommands: number };
+  queue: { jobId: string; status: ImportJobStatus; file: string };
+}
+
+export async function uploadJson(file: File): Promise<UploadJsonResponse> {
   if (!file.name.toLowerCase().endsWith(".json")) {
     throw new ApiError(0, "Only .json files are allowed");
   }
@@ -83,7 +102,37 @@ export async function uploadJson(file: File): Promise<UploadJsonResult> {
     }
     throw new ApiError(res.status, message);
   }
-  return (await res.json()) as UploadJsonResult;
+  return (await res.json()) as UploadJsonResponse;
+}
+
+export async function fetchImportQueue(): Promise<ImportQueueJob[]> {
+  const res = await request<{ data: ImportQueueJob[]; version: string }>(
+    "/api/v1/import-queue",
+  );
+  return res.data;
+}
+
+export async function pollImportJob(
+  jobId: string,
+  onUpdate: (job: ImportQueueJob) => void,
+  { intervalMs = 2000, timeoutMs = 60000 }: {
+    intervalMs?: number;
+    timeoutMs?: number;
+  } = {},
+): Promise<ImportQueueJob> {
+  const deadline = Date.now() + timeoutMs;
+  let last: ImportQueueJob | undefined;
+  while (Date.now() < deadline) {
+    const jobs = await fetchImportQueue();
+    const job = jobs.find((j) => j.jobId === jobId);
+    if (job) {
+      if (job.status !== last?.status) onUpdate(job);
+      last = job;
+      if (job.status === "done" || job.status === "failed") return job;
+    }
+    await new Promise((r) => setTimeout(r, intervalMs));
+  }
+  throw new ApiError(0, "Import job timed out");
 }
 
 export async function fetchCommands(): Promise<Command[]> {
