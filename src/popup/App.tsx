@@ -20,7 +20,11 @@ import {
 } from "../lib/clipboard";
 import { searchWith } from "../lib/search";
 
-export default function App() {
+interface AppProps {
+  mode?: "popup" | "sidepanel";
+}
+
+export default function App({ mode = "popup" }: AppProps) {
   useTheme();
 
   const { commands, searcher } = useCommands();
@@ -119,6 +123,19 @@ export default function App() {
     }
   };
 
+  const openSidepanel = async () => {
+    try {
+      const win = await chrome.windows.getCurrent();
+      if (win.id !== undefined) {
+        await chrome.sidePanel.open({ windowId: win.id });
+        window.close();
+      }
+    } catch (err) {
+      setToastMessage("Cannot open sidebar");
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (pendingCommand || detailCommand) return;
@@ -203,8 +220,24 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-[500px] w-[400px] flex-col bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-      <SearchBar ref={searchInput} value={query} onChange={setQuery} />
+    <div className="flex h-full w-full flex-col bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+      <SearchBar
+        ref={searchInput}
+        value={query}
+        onChange={setQuery}
+        action={
+          mode === "popup" ? (
+            <button
+              onClick={() => void openSidepanel()}
+              className="rounded p-1.5 text-sm text-slate-400 hover:bg-slate-100 hover:text-blue-500 dark:hover:bg-slate-700"
+              title="Pin as sidebar"
+              aria-label="Pin as sidebar"
+            >
+              📌
+            </button>
+          ) : null
+        }
+      />
       <CategoryTabs active={activeTab} onChange={setActiveTab} />
       {isCategoryTab && (
         <CategoryHeader

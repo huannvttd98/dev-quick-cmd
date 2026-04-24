@@ -18,7 +18,10 @@ export default defineManifest({
     service_worker: "src/background/service-worker.ts",
     type: "module",
   },
-  permissions: ["storage", "notifications", "offscreen"],
+  permissions: ["storage", "notifications", "offscreen", "sidePanel"],
+  side_panel: {
+    default_path: "src/sidepanel/index.html",
+  },
   omnibox: { keyword: "cli" },
   commands: {
     _execute_action: {
